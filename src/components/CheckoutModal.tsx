@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
-import { X, CreditCard, Truck, CheckCircle, MapPin, Phone } from 'lucide-react';
-import { useCartStore } from '../stores/cartStore';
-import { useAuthStore } from '../stores/authStore';
-import toast from 'react-hot-toast';
+import React, { useState } from "react";
+import { X, CreditCard, Truck, CheckCircle, MapPin, Phone } from "lucide-react";
+import { useCartStore } from "../stores/cartStore";
+import { useUser } from "@clerk/clerk-react";
+import toast from "react-hot-toast";
 
 interface CheckoutModalProps {
   isOpen: boolean;
@@ -10,12 +10,12 @@ interface CheckoutModalProps {
 }
 
 export function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
-  const [address, setAddress] = useState('');
-  const [phone, setPhone] = useState('');
+  const [address, setAddress] = useState("");
+  const [phone, setPhone] = useState("");
   const [loading, setLoading] = useState(false);
   const [orderComplete, setOrderComplete] = useState(false);
   const { items, getTotalPrice, clearCart } = useCartStore();
-  const { user } = useAuthStore();
+  const { user } = useUser();
 
   if (!isOpen) return null;
 
@@ -27,16 +27,16 @@ export function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
 
     try {
       // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      await new Promise((resolve) => setTimeout(resolve, 2000));
 
       setOrderComplete(true);
       clearCart();
-      toast.success('Order placed successfully!', {
-        icon: '🎉',
+      toast.success("Order placed successfully!", {
+        icon: "🎉",
         duration: 4000,
       });
     } catch (error: any) {
-      toast.error('Failed to place order');
+      toast.error("Failed to place order");
     } finally {
       setLoading(false);
     }
@@ -49,9 +49,12 @@ export function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
           <div className="bg-green-100 rounded-full p-4 w-20 h-20 mx-auto mb-4 flex items-center justify-center">
             <CheckCircle className="h-12 w-12 text-green-600" />
           </div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">Order Confirmed!</h2>
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">
+            Order Confirmed!
+          </h2>
           <p className="text-gray-600 mb-6">
-            Thank you for your purchase. Your order is being processed and you'll receive a confirmation email shortly.
+            Thank you for your purchase. Your order is being processed and
+            you'll receive a confirmation email shortly.
           </p>
           <div className="bg-gray-50 rounded-lg p-4 mb-6">
             <p className="text-sm text-gray-600">Order Total</p>
@@ -87,7 +90,9 @@ export function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
           <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-3 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center">
             <CreditCard className="h-8 w-8 text-white" />
           </div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-2 text-center">Checkout</h2>
+          <h2 className="text-2xl font-bold text-gray-900 mb-2 text-center">
+            Checkout
+          </h2>
         </div>
 
         <div className="mb-6">
@@ -95,8 +100,12 @@ export function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
           <div className="space-y-2 max-h-32 overflow-y-auto bg-gray-50 rounded-lg p-3">
             {items.map((item) => (
               <div key={item.id} className="flex justify-between text-sm">
-                <span className="flex-1">{item.name} x{item.quantity}</span>
-                <span className="font-medium">${(item.price * item.quantity).toFixed(2)}</span>
+                <span className="flex-1">
+                  {item.name} x{item.quantity}
+                </span>
+                <span className="font-medium">
+                  ${(item.price * item.quantity).toFixed(2)}
+                </span>
               </div>
             ))}
           </div>
@@ -111,7 +120,9 @@ export function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
             </div>
             <div className="flex justify-between font-semibold text-lg pt-1 border-t">
               <span>Total:</span>
-              <span className="text-blue-600">${(getTotalPrice() * 1.08).toFixed(2)}</span>
+              <span className="text-blue-600">
+                ${(getTotalPrice() * 1.08).toFixed(2)}
+              </span>
             </div>
           </div>
         </div>

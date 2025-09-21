@@ -7,7 +7,7 @@ import { AdminDashboard } from "./components/admin/AdminDashboard";
 import { AboutUs } from "./components/AboutUs";
 import { ContactUs } from "./components/ContactUs";
 import { Products } from "./components/Products";
-import { useAuthStore } from "./stores/authStore";
+import { useUser } from "@clerk/clerk-react";
 import { mockProducts, Product } from "./lib/mockData";
 import {
   Zap,
@@ -233,11 +233,14 @@ function Layout({
 
 // Main App component with routing
 function App() {
-  const { user, isAdmin } = useAuthStore();
+  const { user, isLoaded } = useUser();
   const [searchQuery, setSearchQuery] = useState("");
 
   // Check if we should show admin dashboard
-  if (window.location.pathname === "/admin" && isAdmin) {
+  if (
+    window.location.pathname === "/admin" &&
+    user?.publicMetadata?.role === "admin"
+  ) {
     return (
       <>
         <AdminDashboard />

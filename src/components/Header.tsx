@@ -1,10 +1,8 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { ShoppingCart, User, Search, Menu, X, Zap } from "lucide-react";
-import toast from "react-hot-toast";
+import { UserButton, SignInButton, useUser } from "@clerk/clerk-react";
 import { useCartStore } from "../stores/cartStore";
-import { useAuthStore } from "../stores/authStore";
-import { AuthModal } from "./AuthModal";
 import { Cart } from "./Cart";
 
 interface HeaderProps {
@@ -13,10 +11,9 @@ interface HeaderProps {
 
 export function Header({ onSearch }: HeaderProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isAuthOpen, setIsAuthOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const { toggleCart, getTotalItems } = useCartStore();
-  const { user, isAdmin, signOut } = useAuthStore();
+  const { user, isLoaded } = useUser();
 
   const navItems = [
     { name: "Home", href: "/" },
@@ -28,12 +25,6 @@ export function Header({ onSearch }: HeaderProps) {
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     onSearch(searchQuery);
-  };
-
-  const handleSignOut = () => {
-    signOut();
-    setIsMenuOpen(false);
-    toast.success("Signed out successfully!");
   };
 
   return (
@@ -99,56 +90,35 @@ export function Header({ onSearch }: HeaderProps) {
                 )}
               </button>
 
-              {user ? (
-                <div className="relative">
-                  <button
-                    onClick={() => setIsMenuOpen(!isMenuOpen)}
-                    className="flex items-center space-x-2 p-2 text-gray-700 hover:text-blue-600 transition-colors"
-                  >
-                    <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center">
-                      <User className="h-4 w-4 text-white" />
-                    </div>
-                    {isAdmin && (
-                      <span className="text-sm font-medium">Admin</span>
-                    )}
-                  </button>
-
-                  {isMenuOpen && (
-                    <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-1 z-50 border">
-                      <div className="px-4 py-2 border-b">
-                        <p className="text-sm font-medium text-gray-900">
-                          {user.name}
-                        </p>
-                        <p className="text-xs text-gray-500">{user.email}</p>
-                      </div>
-                      {isAdmin && (
-                        <button
-                          onClick={() => {
-                            window.location.href = "/admin";
-                            setIsMenuOpen(false);
-                          }}
-                          className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left"
-                        >
-                          Admin Panel
-                        </button>
-                      )}
+              {isLoaded &&
+                (user ? (
+                  <div className="flex items-center space-x-2">
+                    <UserButton
+                      afterSignOutUrl="/"
+                      appearance={{
+                        elements: {
+                          avatarBox: "w-8 h-8",
+                        },
+                      }}
+                    />
+                    {user.publicMetadata?.role === "admin" && (
                       <button
-                        onClick={handleSignOut}
-                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left"
+                        onClick={() => {
+                          window.location.href = "/admin";
+                        }}
+                        className="px-3 py-1 text-xs bg-emerald-100 text-emerald-700 rounded-full font-medium hover:bg-emerald-200 transition-colors"
                       >
-                        Sign out
+                        Admin
                       </button>
-                    </div>
-                  )}
-                </div>
-              ) : (
-                <button
-                  onClick={() => setIsAuthOpen(true)}
-                  className="p-2 text-gray-700 hover:text-blue-600 transition-colors"
-                >
-                  <User className="h-6 w-6" />
-                </button>
-              )}
+                    )}
+                  </div>
+                ) : (
+                  <SignInButton mode="modal">
+                    <button className="p-2 text-gray-700 hover:text-blue-600 transition-colors">
+                      <User className="h-6 w-6" />
+                    </button>
+                  </SignInButton>
+                ))}
 
               {/* Mobile menu button */}
               <button
@@ -197,7 +167,6 @@ export function Header({ onSearch }: HeaderProps) {
         </div>
       </header>
 
-      <AuthModal isOpen={isAuthOpen} onClose={() => setIsAuthOpen(false)} />
       <Cart />
     </>
   );
